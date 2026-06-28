@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"pdf-golang/repository"
 	"strconv"
+	"strings"
 )
 
 func mul(price float64, quantity int) float64 {
@@ -113,7 +114,50 @@ func main() {
 		w.Write(pdf)
 	})
 
-	
+	// Эндпоинт для PDF конкретного заказа
+	http.HandleFunc("/pdf/order/", func(w http.ResponseWriter, r *http.Request) {
+		idStr := strings.TrimPrefix(r.URL.Path, "/pdf/order/")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "Неверный ID заказа", http.StatusBadRequest)
+			return
+		}
+		order, found := repo.GetOrderByID(id)
+		if !found {
+			http.Error(w, "Заказ не найден", http.StatusNotFound)
+			return
+		}
+
+		data := struct {
+			Order repository.Order
+			Title string
+		}{
+			Order: order,
+			Title: "Заказ #" + strconv.Itoa(id),
+		}
+
+		var htmlBuf bytes.Buffer
+		if err := orderTmpl.Execute(&htmlBuf, data); err != nil {
+			log.Printf("Ошибка рендеринга HTML: %v", err)
+			http.Error(w, "Ошибка генерации PDF", http.StatusInternalServerError)
+			return
+		}
+
+		pdf, err := generatePDFWithWkhtmltopdf(htmlBuf.String())
+		if err != nil {
+			log.Printf("Ошибка генерации PDF: %v", err)
+			http.Error(w, "Ошибка генерации PDF", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/pdf")
+		w.Header().Set(
+			"Content-Disposition",
+			fmt.Sprintf("attachment; filename=order-%d.pdf", id),
+		)
+		_, _ = w.Write(pdf)
+
+	})
 
 	// Статика
 	fileServer := http.FileServer(http.Dir("./static"))
