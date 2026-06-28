@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">📦 OrderManager</div>
+                <a href="/" class="back-link">← Все заказы</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="order-detail">
+                <div class="order-header">
+                    <div>
+                        <h1 class="order-title">Заказ #{{.Order.ID}}</h1>
+                        <div class="order-meta">
+                            <span class="meta-item">📅 {{.Order.Date}}</span>
+                            <span class="meta-item">📦 {{len .Order.Items}} товаров</span>
+                        </div>
+                    </div>
+                    <div class="customer-badge">
+                        <span class="customer-icon">👤</span>
+                        <span class="customer-name">{{.Order.Customer}}</span>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="order-table">
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th class="text-center">Кол-во</th>
+                                <th class="text-right">Цена</th>
+                                <th class="text-right">Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Order.Items}}
+                            <tr>
+                                <td>
+                                    <div class="item-name">
+                                        <span class="item-dot"></span>
+                                        {{.Name}}
+                                    </div>
+                                </td>
+                                <td class="text-center quantity">{{.Quantity}}</td>
+                                <td class="text-right">{{printf "%.2f" .Price}} ₽</td>
+                                <td class="text-right item-total">{{printf "%.2f" (mul .Price .Quantity)}} ₽</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right total-label">
+                                    <strong>Итого:</strong>
+                                </td>
+                                <td class="text-right total-amount">
+                                    <strong>{{printf "%.2f" (sumOrderItems .Order.Items)}} ₽</strong>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

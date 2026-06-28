@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">📦 OrderManager</div>
+            </div>
+        </header>
+
+        <main>
+            <h1 class="page-title">{{.Title}}</h1>
+            <div class="orders-grid">
+                {{range .Orders}}
+                <a href="/order/{{.ID}}" class="order-card">
+                    <div class="order-card-header">
+                        <span class="order-id">Заказ #{{.ID}}</span>
+                        <span class="order-date">{{.Date}}</span>
+                    </div>
+                    <div class="order-card-body">
+                        <p class="customer">{{.Customer}}</p>
+                        <p class="items-count">{{len .Items}} товаров</p>
+                    </div>
+                    <div class="order-card-footer">
+                        <span class="total">Сумма: {{printf "%.2f" (sumOrderItems .Items)}} ₽</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </a>
+                {{end}}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
